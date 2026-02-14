@@ -68,7 +68,7 @@ def export_figures(pdf_path, output_base_dir="exported_figures"):
     images_dir.mkdir(parents=True, exist_ok=True)
     tables_dir.mkdir(parents=True, exist_ok=True)
     
-    print(f"Exporting figures from {pdf_path}...")
+    print(f"Gettingt the figures from{pdf_path}...")
     
     img_converter = get_image_export_converter()
     conv_res = img_converter.convert(pdf_path)
@@ -107,7 +107,7 @@ def get_last_chunk_id_fallback(jsonl_path):
         return get_last_chunk_id(jsonl_path)
     return 0
 
-# ============================Find all PDFs recursively==============================
+# ============================Find all PDFs recursively(this is used only when we have multiple subfolders with pdfs)==============================
 def find_all_pdfs(root_folder):
     """Recursively find all PDF files in subdirectories."""
     pdf_files = []
@@ -133,8 +133,7 @@ def process_folder(folder_path=None, file_path=None, starting_chunk_id=0, export
         
         pdf_path_obj = Path(file_path)
         doc_name = pdf_path_obj.stem
-        
-        # Get relative path from parent directory for category tracking
+
         relative_path = pdf_path_obj.parent.name
         
         doc = converter.convert(source=file_path).document
@@ -168,13 +167,12 @@ def process_folder(folder_path=None, file_path=None, starting_chunk_id=0, export
                 pdf_path_str = str(pdf_path)
                 print(f"[{idx}/{total_files}] Processing: {pdf_path_str}")
                 
-                # Export figures if requested
+                #Gets imagges and tables if requested
                 if export_images:
                     export_figures(pdf_path_str)
                 
                 doc_name = pdf_path.stem
                 
-                # Get category from parent directory name
                 category = pdf_path.parent.name
                 
                 try:
@@ -201,7 +199,6 @@ def process_folder(folder_path=None, file_path=None, starting_chunk_id=0, export
                     print(f"Error processing {pdf_path_str}: {e}")
                     continue
         else:
-            # Original behavior: only process PDFs in the specified folder (not subdirectories)
             for pdf_path in glob.glob(os.path.join(folder_path, "*.pdf")):
                 print(f"Processing: {pdf_path}")
                 
@@ -264,7 +261,6 @@ if __name__ == "__main__":
 
     print(f"\n✓ {len(new_chunks)} chunks written to {OUTPUT_JSONL}")
     
-    # Show summary by category
     if new_chunks:
         from collections import Counter
         categories = Counter(chunk["category"] for chunk in new_chunks)
